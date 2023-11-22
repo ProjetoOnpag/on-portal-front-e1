@@ -4,12 +4,110 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Portal OnPag</title>
-    <link href="/assets/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <script src="../assets/js/color-modes.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script>
+      (() => {
+        'use strict'
+
+        const getStoredTheme = () => localStorage.getItem('theme')
+        const setStoredTheme = theme => localStorage.setItem('theme', theme)
+
+        const getPreferredTheme = () => {
+          const storedTheme = getStoredTheme()
+          if (storedTheme) {
+            return storedTheme
+          }
+
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+
+        const setTheme = theme => {
+          if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-bs-theme', 'dark')
+          } else {
+            document.documentElement.setAttribute('data-bs-theme', theme)
+          }
+        }
+
+        setTheme(getPreferredTheme())
+
+        const showActiveTheme = (theme, focus = false) => {
+          const themeSwitcher = document.querySelector('#bd-theme')
+
+          if (!themeSwitcher) {
+            return
+          }
+
+          const themeSwitcherText = document.querySelector('#bd-theme-text')
+          const activeThemeIcon = document.querySelector('.theme-icon-active use')
+          const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+          const svgOfActiveBtn = btnToActive.querySelector('svg use').getAttribute('href')
+
+          document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+            element.classList.remove('active')
+            element.setAttribute('aria-pressed', 'false')
+          })
+
+          btnToActive.classList.add('active')
+          btnToActive.setAttribute('aria-pressed', 'true')
+          activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+          const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`
+          themeSwitcher.setAttribute('aria-label', themeSwitcherLabel)
+
+          if (focus) {
+            themeSwitcher.focus()
+          }
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+          const storedTheme = getStoredTheme()
+          if (storedTheme !== 'light' && storedTheme !== 'dark') {
+            setTheme(getPreferredTheme())
+          }
+        })
+
+        window.addEventListener('DOMContentLoaded', () => {
+          showActiveTheme(getPreferredTheme())
+
+          document.querySelectorAll('[data-bs-theme-value]')
+            .forEach(toggle => {
+              toggle.addEventListener('click', () => {
+                const theme = toggle.getAttribute('data-bs-theme-value')
+                setStoredTheme(theme)
+                setTheme(theme)
+                showActiveTheme(theme, true)
+              })
+            })
+        })
+      })()
+    </script>
     <style>
-     
+          .container {
+        max-width: 960px;
+      }
+
+      .btn-bd-primary {
+        --bd-violet-bg: #301549;
+        --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+        --bs-btn-font-weight: 600;
+        --bs-btn-color: var(--bs-white);
+        --bs-btn-bg: var(--bd-violet-bg);
+        --bs-btn-border-color: var(--bd-violet-bg);
+        --bs-btn-hover-color: var(--bs-white);
+        --bs-btn-hover-bg: #301549;
+        --bs-btn-hover-border-color: #301549;
+        --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+        --bs-btn-active-color: var(--bs-btn-hover-color);
+        --bs-btn-active-bg: #301549;
+        --bs-btn-active-border-color: #301549;  
+        }
+
+      .bi {
+              vertical-align: -.125em;
+              fill: currentColor;
+            }
     </style>
-    <link href="/assets/css/portal.css" rel="stylesheet">
   </head>
   <body class="bg-body-tertiary">
     <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
@@ -62,34 +160,10 @@
           <form class="prv-validation" novalidate>
             <div class="row g-3">
             <h4 class="mb-3">Endereço provider</h4>
-            <div class="col-sm-4">
-                <label for="cepPrv" class="form-label">CEP</label>
-                <input type="text" class="form-control" id="cepPrv" placeholder="08553-560" value="" required onblur="pesquisarCEPPrv(this)">
-                <div class="invalid-feedback">
-                Por favor, preencha um CEP Valido.
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <label for="enderecoPrv" class="form-label">Endereço</label>
-                <input type="text" class="form-control" id="enderecoPrv" placeholder="Rua Joaquim Nabuco, 230, Santa Helena, Poá-SP" value="" required>
-                <div class="invalid-feedback">
-                Por favor, preencha um Endereço Valido.
-                </div>
-            </div>
-            <div class="col-sm-2">
-                <label for="numero-endereco-prv" class="form-label">Numero</label>
-                <input type="text" class="form-control" id="numero-endereco-prv" placeholder="230" value="" required>
-                <div class="invalid-feedback">
-                Por favor, preencha um numero Valido.
-                </div>
-            </div>
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29268.04348577406!2d-46.3470592!3d-23.5143168!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce7ae062ce59a5%3A0x7b18cf39841b9066!2sCalmon%20Viana!5e0!3m2!1spt-BR!2sbr!4v1699855935818!5m2!1spt-BR!2sbr" width="600" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             <hr class="my-4">
-
-            <button class="w-80 btn btn-bd-primary btn-lg" type="submit">Salvar</button>
             </div>
           </form>
-          <h4 class="mb-4"></h4>
           <div class="col-md-12">
             <label for="tipo-cartao" class="form-label">Tipo de cartao</label>
             <select class="form-select" id="tipo-cartao" required>
@@ -102,6 +176,8 @@
             <div class="invalid-feedback">
               Selecione a carteira correta.
             </div>
+            <h4 class="mb-3"></h4>
+            <button id="solicitar-cartao-btn" type="submit"class="w-100 btn btn-bd-primary btn-lg" >Solicitar o Cartão</button>
           </div>
 
         </div>
@@ -137,6 +213,13 @@
               <input type="text" class="form-control" id="rg" placeholder="50.524.566-8" value="" required>
               <div class="invalid-feedback">
                Por favor, preencha um RG Valido.
+              </div>
+            </div>
+            <div class="col-sm-12">
+              <label for="cnpj" class="form-label">CNPJ:</label>
+              <input type="text" class="form-control" id="cnpj" placeholder="00.776.574/0001-56" value="" required>
+              <div class="invalid-feedback">
+               Por favor, preencha um CNPJ Valido.
               </div>
             </div>
             <div class="col-sm-12">
@@ -224,8 +307,173 @@
   </footer>
   -->
 </div>
-    <script src="./assets/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <script src="assets/js/portal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script >
+    function enviarDados() {
+        // Capturar os dados do formulário
+        var nome = document.getElementById("cpf").value;
+
+        // Criar um objeto com os dados
+        var dados = {
+            nome: nome
+        };
+
+        // Enviar uma solicitação POST para a API REST em Java
+        fetch('http://localhost:8083/v1/cartao', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dados)
+        })
+        .then(response => response.json())
+        .then(data => console.log('Resposta da API:', data))
+        .catch(error => console.error('Erro:', error));
+    }
+
+    function enviarDados() {
+        alert("teste")
+    // Capturar os dados do formulário
+      var nome = document.getElementById("nome").value;
+      var cpf = document.getElementById("cpf").value;
+      var rg = document.getElementById("rg").value;
+      var matricula = document.getElementById("matricula").value;
+      var dataNascimento = document.getElementById("data-nascimento").value;
+      var nomeMae = document.getElementById("nome-mae").value;
+      var email = document.getElementById("email").value;
+      var cep = document.getElementById("cep").value;
+      var endereco = document.getElementById("endereco").value;
+      var numeroEndereco = document.getElementById("numero-endereco").value;
+      var numeroTelefone = document.getElementById("numero-telefone").value;
+      // Criar um objeto com os dados
+      var UserErpDTO = {
+          cpf:limparFormatacao(cpf),
+          nome:nome,
+          matricula:matricula,
+          rg:limparFormatacao(rg),
+          dataNascimento:converterParaTimestamp(dataNascimento),
+          nomeMae: nomeMae,
+          email:email,
+          cep:limparFormatacao(cep),
+          endereco:endereco,
+          numeroEndereco:numeroEndereco,
+          numeroTelefone:limparFormatacao(numeroTelefone)
+      };
+
+      // Enviar uma solicitação POST para a API REST em Java
+      fetch('http://localhost:8083/cartao', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(UserErpDTO)
+      })
+      .then(response => response.json())
+      .then(data => console.log('Resposta da API:', data))
+      .catch(error => console.error('Erro:', error));
+      }
+
+      function formatarData(input) {
+      // Remove caracteres não numéricos
+        let inputValue = input.value.replace(/\D/g, '');
+
+        // Adiciona barras na posição correta
+        if (inputValue.length > 2) {
+          inputValue = inputValue.substring(0, 2) + '/' + inputValue.substring(2);
+        }
+        if (inputValue.length > 5) {
+          inputValue = inputValue.substring(0, 5) + '/' + inputValue.substring(5, 9);
+        }
+
+        // Atualiza o valor do campo
+        input.value = inputValue;
+      }
+
+        function converterParaTimestamp(dataNacional) {
+    // Divide a string da data em dia, mês e ano
+          var partes = dataNacional.split('/');
+          
+          // Mês é baseado em zero no objeto Date, então subtrai 1 do número do mês
+          var mes = partes[1] - 1;
+          
+          // Cria um objeto Date com os componentes da data
+          var data = new Date(partes[2], mes, partes[0]);
+          
+          // Obtém o timestamp em milissegundos
+          var timestamp = data.getTime();
+          
+          return timestamp;
+          }
+
+          function limparFormatacao(data) {
+            // Remove todos os caracteres que não são dígitos
+            data = data.replace(/\D/g, '');
+
+            alert(data);
+            return cpf;
+          }
+
+        function pesquisarCEPPrv(cepPrv){
+          fetch('https://brasilapi.com.br/api/cep/v1/'+cepPrv.value)
+          .then(response =>{return response.json();})
+          .then(data => {
+            enderecoPrv = document.getElementById('enderecoPrv'); 
+            enderecoPrv.value = data.street+ ", " + data.neighborhood + ", " + data.city + " - " + data.state;
+          })
+          .catch(error => console.error('Erro:', error));
+          }
+
+          function pesquisarCEP(cepPrv){
+            fetch('https://brasilapi.com.br/api/cep/v1/'+cepPrv.value)
+          .then(response =>{return response.json();})
+          .then(data => {
+            endereco = document.getElementById('endereco'); 
+            endereco.value = data.street+ ", " + data.neighborhood + ", " + data.city + " - " + data.state;
+          })
+          .catch(error => console.error('Erro:', error));
+          }
+
+          function verificarCamposObrigatorios() {
+            var camposObrigatorios = ['cpf', 'nome', 'nome-mae', 'data-nascimento', 'email', 'cep', 'endereco', 'numero-endereco'];
+            var camposPreenchidos = true;
+
+            for (var i = 0; i < camposObrigatorios.length; i++) {
+                var campoId = camposObrigatorios[i];
+                var campo = document.getElementById(campoId);
+
+                if (campo.value.trim() === '') {
+                    camposPreenchidos = false;
+                    break;
+                }
+            }
+
+            // Atualiza o estado do campo tipo-cartao com base nos campos preenchidos
+            var tipoCartao = document.getElementById('tipo-cartao');
+            tipoCartao.disabled = !camposPreenchidos;
+          }
+
+          // ouvinte de eventos para os campos obrigatórios
+          var camposObrigatorios = ['cpf', 'nome', 'nome-mae', 'data-nascimento', 'email', 'cep', 'endereco', 'numero-endereco'];
+          for (var i = 0; i < camposObrigatorios.length; i++) {
+            var campo = document.getElementById(camposObrigatorios[i]);
+            campo.addEventListener('blur', verificarCamposObrigatorios);
+          }
+
+          // Chama a função ao carregar a página para verificar o estado inicial
+          document.addEventListener('DOMContentLoaded', function() {
+            verificarCamposObrigatorios();
+          });
+
+          // Função para atualizar o estado do campo tipo-cartao quando o valor é alterado
+          function atualizarEstadoTipoCartao() {
+            verificarCamposObrigatorios();
+          }
+
+          // ouvinte de eventos para o campo tipo-cartao, para reagir caso o valor seja alterado
+          var tipoCartao = document.getElementById('tipo-cartao');
+          tipoCartao.addEventListener('change', atualizarEstadoTipoCartao);
+
+    </script>
   
     <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
     <script>
@@ -251,5 +499,82 @@
         .catch(error => console.error('Erro:', error));
 
     </script>
+
+    <!--teste de Modal V1-->
+
+      <script>
+        document.getElementById("solicitar-cartao-btn").addEventListener("click", function() {
+            var tipoCartao = document.getElementById("tipo-cartao").value;
+
+            if (tipoCartao === "Escolar") {
+
+                // "Escolar" for selecionada, mostra o modal
+                $('#modalEscolar').modal('show');
+            }
+        });
+
+    </script>
+
+    <!-- Modal para a opção "Escolar" -->
+    <div class="modal fade" id="modalEscolar" tabindex="-1" role="dialog" aria-labelledby="modalEscolarLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEscolarLabel">Modal para Cartão Escolar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- Campos de input para o modal  -->
+
+                      <div class="col-md-5 col-lg-6 order-md-last">
+                        <h4 class="mb-3"></h4>
+                        <form class="prv-validation" novalidate>
+                          <div class="row g-3">
+                          <h4 class="mb-3">Endereço provider</h4>
+                          <div class="col-sm-4">
+                              <label for="cepPrv" class="form-label">CEP</label>
+                              <input type="text" class="form-control" id="cepPrv" placeholder="08553-560" value="" required onblur="pesquisarCEPPrv(this)">
+                              <div class="invalid-feedback">
+                              Por favor, preencha um CEP Valido.
+                              </div>
+                          </div>
+                          <div class="col-sm-6">
+                              <label for="enderecoPrv" class="form-label">Endereço</label>
+                              <input type="text" class="form-control" id="enderecoPrv" placeholder="Rua Joaquim Nabuco, 230, Santa Helena, Poá-SP" value="" required>
+                              <div class="invalid-feedback">
+                              Por favor, preencha um Endereço Valido.
+                              </div>
+                          </div>
+                          <div class="col-sm-2">
+                              <label for="numero-endereco-prv" class="form-label">Numero</label>
+                              <input type="text" class="form-control" id="numero-endereco-prv" placeholder="230" value="" required>
+                              <div class="invalid-feedback">
+                              Por favor, preencha um numero Valido.
+                              </div>
+                          </div>
+                          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29268.04348577406!2d-46.3470592!3d-23.5143168!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce7ae062ce59a5%3A0x7b18cf39841b9066!2sCalmon%20Viana!5e0!3m2!1spt-BR!2sbr!4v1699855935818!5m2!1spt-BR!2sbr" width="600" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                          <hr class="my-4">
+              
+                          
+                          </div>
+                        </form>
+                   
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary">Salvar</button>
+                </div>
+            
+        </div>
+    </div>
+
+
+<!-- Popper.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
   </body>
 </html>
+
